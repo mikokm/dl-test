@@ -13,7 +13,7 @@
   .inactive {
     transform: translate(1px);
   }
-  .flattened {
+  .flattened, .folded {
     opacity: 0.95;
   }
 </style>
@@ -64,7 +64,7 @@ function arg(key, defaultVal) {
 var divCount = arg("count", 10000);
 
 /**
- * layer=active|inactive|flattened|none
+ * layer=active|inactive|flattened|folded|none
  *
  * Specifies what type of Layer to create around each rects.
  * active and inactive create a transform, with active using 3d
@@ -96,6 +96,9 @@ for (var i = 0; i < divCount; i++) {
   var div = document.createElement("div");
   div.id = i;
   div.className = layerType;
+  if (layerType == "flattened") {
+    div.innerHTML = "A";
+  }
   document.getElementById("body").appendChild(div);
 }
 
