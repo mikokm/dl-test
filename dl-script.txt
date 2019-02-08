@@ -1,0 +1,19 @@
+<div id="myOverlay" style="position: absolute; left: 0px; top: 50%; width: 100%; height: 1px; display: block; background: black none repeat scroll 0% 0%;"></div>
+
+var iteration = 0;
+function runFrame() {
+  iteration++;
+
+  let overlay = document.getElementById("myOverlay");
+  if (overlay.style.display == "none") {
+    overlay.style.display = "block";
+  } else {
+    overlay.style.display = "none";
+  }
+
+  if (iteration < 100000) {
+    window.requestAnimationFrame(runFrame);
+  }
+}
+
+window.requestAnimationFrame(runFrame);

@@ -1,0 +1,160 @@
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <style>
+    div {
+        width: 10px;
+        height: 10px;
+        background-color: green;
+        display: inline-block;
+    }
+
+    .active {
+        transform: translate3d(1px, 1px, 1px);
+    }
+
+    .inactive {
+        transform: translate(1px);
+    }
+
+    .flattened,
+    .folded {
+        opacity: 0.95;
+    }
+
+    #overlay {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 1px;
+        display: none;
+        background: black;
+    }
+    </style>
+</head>
+
+<body id="body">
+    <script>
+    function parseArgs() {
+        var query = window.location.search.substring(1);
+
+        var split = query.split("&");
+
+        var args = {}
+        for (var i = 0; i < split.length; i++) {
+            var pair = split[i].split("=");
+
+            var key = pair[0];
+            var value = true;
+            if (pair.length >= 2) {
+                value = pair[1];
+            }
+
+            args[key] = value;
+        }
+
+        return args;
+    }
+
+    var gArgs = null;
+
+    function arg(key, defaultVal) {
+        if (gArgs === null) {
+            gArgs = parseArgs();
+        }
+
+        if (!(key in gArgs))
+            return defaultVal;
+
+        return gArgs[key];
+    }
+
+    /**
+     * count=<number>
+     *
+     * Specify the number of rects to create, defaults
+     * to 1000.
+     */
+    var divCount = arg("count", 10000);
+
+    /**
+     * layer=active|inactive|flattened|folded|none
+     *
+     * Specifies what type of Layer to create around each rects.
+     * active and inactive create a transform, with active using 3d
+     * to force an active layer.
+     * flattened creates an opacity, which gecko will flatten away.
+     * Default is none, which creates no layers.
+     */
+    var layerType = arg("layer", "none");
+
+    /**
+     * modify=all|one|iterate
+     *
+     * Specifies which rect to modify each frame.
+     * all modifies all rectangles, one modifies only the first.
+     * iterate (the default) modifies a successive rect each frame.
+     */
+    var modify = arg("modify", "iterate");
+
+    /**
+     * rebuild
+     *
+     * Forces a full display item rebuild each frame (disables
+     * retained-dl) by triggering a no-op style change on the
+     * body element.
+     */
+    var rebuild = arg("rebuild", false);
+
+    for (var i = 0; i < divCount; i++) {
+        var div = document.createElement("div");
+        div.id = i;
+        div.className = layerType;
+        if (layerType == "flattened") {
+            div.innerHTML = "A";
+        }
+        div.innerHTML = "#";
+        document.getElementById("body").appendChild(div);
+    }
+
+    function toggleSquare(index) {
+        if (document.getElementById(index).style.backgroundColor == "red") {
+            document.getElementById(index).style.backgroundColor = "green";
+        } else {
+            document.getElementById(index).style.backgroundColor = "red";
+        }
+    }
+
+    var iteration = 0;
+
+    function runFrame() {
+        if (modify == "all") {
+            for (var i = 0; i < divCount; i++) {
+                toggleSquare(i);
+            }
+        } else {
+            toggleSquare(iteration);
+
+            if (modify == "iterate") {
+                iteration++;
+                iteration = iteration % divCount;
+            }
+        }
+        if (rebuild) {
+            let overlay = document.getElementById("overlay");
+            if (overlay.style.display == "none") {
+                overlay.style.display = "block";
+            } else {
+                overlay.style.display = "none";
+            }
+        }
+        window.requestAnimationFrame(runFrame);
+    }
+    window.requestAnimationFrame(runFrame);
+    </script>
+    Display list building benchmark
+    <div id="overlay"></div>
+</body>
+</html>
